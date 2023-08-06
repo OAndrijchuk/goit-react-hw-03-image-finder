@@ -1,4 +1,5 @@
 import { Component } from 'react';
+
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { feachPictures } from 'service/Api';
@@ -6,6 +7,7 @@ import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
 import { ModalImg } from './App.styled';
 import { Loader } from './Loader/Loader';
+import { toast } from 'react-toastify';
 
 export class App extends Component {
   state = {
@@ -16,8 +18,7 @@ export class App extends Component {
     totalHits: 0,
     showloadMore: false,
     showLoader: false,
-    bigImgUrl: '#',
-    showBigImg: false,
+    bigImgUrl: '',
   };
   async componentDidUpdate(prevProps, prevState) {
     if (
@@ -25,33 +26,33 @@ export class App extends Component {
       this.state.page !== prevState.page
     ) {
       try {
-        const { page, per_page, searchQuery, totalHits } = this.state;
+        const { page, per_page, searchQuery } = this.state;
         this.setState({ showLoader: true, showloadMore: false });
-        const maxPages = Math.ceil(totalHits / per_page);
         const data = await feachPictures({ page, per_page, q: searchQuery });
+        if (!data.totalHits) {
+          toast.warn(
+            'Sorry, but nothing was found for your request. Change the request and try again.'
+          );
+          return;
+        }
 
         this.setState({
           photos: page === 1 ? data.hits : [...prevState.photos, ...data.hits],
           totalHits: data.totalHits,
-          showloadMore: page === maxPages ? false : true,
+          showloadMore:
+            page === Math.ceil(data.totalHits / per_page) ? false : true,
         });
       } catch {
+        toast.error('Oops!!! An error occurred. Please try again.');
         console.log('eror');
       } finally {
         this.setState({ showLoader: false });
       }
     }
-
-    if (
-      this.state.bigImgUrl !== '#' &&
-      this.state.bigImgUrl !== prevState.bigImgUrl
-    ) {
-      this.setState({ showBigImg: true });
-    }
   }
   handleSearchForm = query => {
     if (!query) {
-      alert('введіть коректні дані');
+      toast.warn('Please enter a request!');
       return;
     }
     if (this.state.searchQuery !== query) {
@@ -75,25 +76,19 @@ export class App extends Component {
     });
   };
   closeModal = () => {
-    this.setState({ showBigImg: false, bigImgUrl: '#' });
+    this.setState({ bigImgUrl: '' });
   };
 
   render() {
-    const {
-      showLoader,
-      showloadMore,
-      showBigImg,
-      bigImgUrl,
-      searchQuery,
-      photos,
-    } = this.state;
+    const { showLoader, showloadMore, bigImgUrl, searchQuery, photos } =
+      this.state;
     return (
       <>
         <Searchbar onSubmit={this.handleSearchForm} />
         <ImageGallery photos={photos} onShowBigImg={this.handleShowBigImg} />
         {showLoader && <Loader />}
         {showloadMore && <Button onLoadMore={this.handleLoadMore} />}
-        {showBigImg && (
+        {bigImgUrl && (
           <Modal closeImgModal={this.closeModal}>
             <ModalImg src={bigImgUrl} alt={searchQuery} />
           </Modal>

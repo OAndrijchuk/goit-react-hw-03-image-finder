@@ -1,19 +1,23 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { List } from './ImageGallery.styled';
 
 export const ImageGallery = ({ photos, onShowBigImg }) => {
-  const handlePhoto = e => {
-    if (e.target.dataset.bigImg) {
-      onShowBigImg(e.target.dataset.bigImg);
-    }
-  };
-
   return (
-    <List className="gallery" onClick={handlePhoto}>
+    <List className="gallery">
       {photos.map(photo => (
-        <ImageGalleryItem {...photo} key={photo.id} />
+        <ImageGalleryItem
+          {...photo}
+          key={photo.id}
+          onShowBigImg={onShowBigImg}
+        />
       ))}
     </List>
   );
+};
+
+ImageGallery.propTypes = {
+  photos: PropTypes.array.isRequired,
+  onShowBigImg: PropTypes.func.isRequired,
 };

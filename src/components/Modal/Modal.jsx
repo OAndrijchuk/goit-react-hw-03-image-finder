@@ -1,6 +1,5 @@
-// import React from 'react';
 import { Overlay, ModalContainer } from './Modal.styled';
-
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 export class Modal extends Component {
@@ -27,15 +26,6 @@ export class Modal extends Component {
     );
   }
 }
-
-// export const Modal = ({ closeImgModal, children }) => {
-//   return (
-//     <Overlay
-//       className="overlay"
-//       onClick={e => (e.target === e.currentTarget ? closeImgModal() : null)}
-//     >
-//       <ModalContainer className="modal">{children}</ModalContainer>
-//     </Overlay>
-//   );
-// };
-//
+Modal.propTypes = {
+  closeImgModal: PropTypes.func.isRequired,
+};
